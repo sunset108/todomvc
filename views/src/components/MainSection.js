@@ -15,26 +15,20 @@ export default class MainSection extends Component {
     todos: PropTypes.array.isRequired,
     actions: PropTypes.object.isRequired
   }
-
-  constructor(props){
-    super(props)
-    this.state = {
-	  todos: props.todos,
-	  filter: SHOW_ALL
-	}
-  }
   
+  state = { filter: SHOW_ALL }
+
   componentWillMount () {
     fetch('/task/').then(data => { 
       return data.json()
     }).then(data => {
-	  this.setState({
-		todos: data.Tasks.map(todo => ({
+	  this.props.actions.listAll(
+	    data.Tasks.map(todo => ({
 			id: todo.ID,
 			text: todo.Title,
             completed: todo.Done
 		}))
-	  })
+	  )
 	})
   }
 
@@ -75,8 +69,8 @@ export default class MainSection extends Component {
   }
 
   render() {
-    const { actions } = this.props
-    const { filter, todos } = this.state
+    const { actions, todos } = this.props
+    const { filter } = this.state
 
     const filteredTodos = todos.filter(TODO_FILTERS[filter])
     const completedCount = todos.reduce((count, todo) =>
