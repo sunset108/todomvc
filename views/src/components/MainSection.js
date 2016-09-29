@@ -15,21 +15,11 @@ export default class MainSection extends Component {
     todos: PropTypes.array.isRequired,
     actions: PropTypes.object.isRequired
   }
-  
+
   state = { filter: SHOW_ALL }
 
   componentWillMount () {
-    fetch('/task/').then(data => { 
-      return data.json()
-    }).then(data => {
-	  this.props.actions.listAll(
-	    data.Tasks.map(todo => ({
-			id: todo.ID,
-			text: todo.Title,
-            completed: todo.Done
-		}))
-	  )
-	})
+    this.props.actions.listAll()
   }
 
   handleClearCompleted = () => {

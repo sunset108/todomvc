@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react'
 import TodoTextInput from './TodoTextInput'
+import 'whatwg-fetch'
 
 export default class Header extends Component {
   static propTypes = {
