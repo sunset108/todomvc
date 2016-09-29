@@ -1,6 +1,15 @@
 import { ADD_TODO, DELETE_TODO, EDIT_TODO, COMPLETE_TODO, COMPLETE_ALL, CLEAR_COMPLETED } from '../constants/ActionTypes'
+import 'whatwg-fetch';
 
-export default function todos(state, action) {
+const initialState = [
+  {
+    text: 'Use Redux',
+    completed: false,
+    id: 0
+  }
+]
+
+export default function todos(state = initialState, action) {
   switch (action.type) {
     case ADD_TODO:
       return [

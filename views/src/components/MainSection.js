@@ -12,18 +12,19 @@ const TODO_FILTERS = {
 
 export default class MainSection extends Component {
   static propTypes = {
+    todos: PropTypes.array.isRequired,
     actions: PropTypes.object.isRequired
   }
 
   constructor(props){
     super(props)
     this.state = {
-	  todos: [],
+	  todos: props.todos,
 	  filter: SHOW_ALL
 	}
   }
   
-  componentDidMount () {
+  componentWillMount () {
     fetch('/task/').then(data => { 
       return data.json()
     }).then(data => {
@@ -46,8 +47,7 @@ export default class MainSection extends Component {
   }
 
   renderToggleAll(completedCount) {
-    const { actions } = this.props
-	const { todos } = this.state
+    const { todos, actions } = this.props
     if (todos.length > 0) {
       return (
         <input className="toggle-all"
@@ -59,7 +59,8 @@ export default class MainSection extends Component {
   }
 
   renderFooter(completedCount) {
-    const { filter, todos } = this.state
+    const { todos } = this.props
+    const { filter } = this.state
     const activeCount = todos.length - completedCount
 
     if (todos.length) {
