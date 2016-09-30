@@ -7,7 +7,7 @@ export default function todos(state = [], action) {
     case ADD_TODO:
       return [
         {
-          id: state.reduce((maxId, todo) => Math.max(todo.id, maxId), -1) + 1,
+          id: action.id,
           completed: false,
           text: action.text
         },
@@ -34,10 +34,9 @@ export default function todos(state = [], action) {
       )
 
     case COMPLETE_ALL:
-      const areAllMarked = state.every(todo => todo.completed)
       return state.map(todo => ({
         ...todo,
-        completed: !areAllMarked
+        completed: action.completed
       }))
 
     case CLEAR_COMPLETED:

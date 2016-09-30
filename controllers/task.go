@@ -21,11 +21,31 @@ type TaskController struct {
 //          {"ID": 2, "Title": "Buy bread", "Done": true}
 //        ]}
 func (this *TaskController) ListTasks() {
-	//	res := struct{ Tasks []*models.Task }{models.DefaultTaskList.All()}
-	res := struct{ Tasks []*models.Task }{
-		[]*models.Task{&models.Task{1, "Learn Go", false}, &models.Task{2, "Buy bread", true}}}
+	res := struct{ Tasks []*models.Task }{models.DefaultTaskList.All()}
 	this.Data["json"] = res
 	this.ServeJSON()
+}
+
+// Example:
+//
+//   req: PUT /task/ {true}
+//   res: 200
+func (this *TaskController) CompleteAllTasks() {
+	var req bool
+	if err := json.Unmarshal(this.Ctx.Input.RequestBody, &req); err != nil {
+		this.Ctx.Output.SetStatus(400)
+		this.Ctx.Output.Body([]byte("internal error"))
+		return
+	}
+	models.DefaultTaskList.CompleteAll(req)
+}
+
+// Example:
+//
+//   req: DELETE /task/
+//   res: 200
+func (this *TaskController) ClearCompleted() {
+	models.DefaultTaskList.ClearCompleted()
 }
 
 // Examples:
@@ -48,7 +68,10 @@ func (this *TaskController) NewTask() {
 		this.Ctx.Output.Body([]byte(err.Error()))
 		return
 	}
-	models.DefaultTaskList.Save(t)
+	if r, err := models.DefaultTaskList.Save(t); err == nil {
+		this.Data["json"] = r
+		this.ServeJSON()
+	}
 }
 
 // Examples:
@@ -96,9 +119,25 @@ func (this *TaskController) UpdateTask() {
 		return
 	}
 	if _, ok := models.DefaultTaskList.Find(intid); !ok {
-		this.Ctx.Output.SetStatus(400)
+		this.Ctx.Output.SetStatus(404)
 		this.Ctx.Output.Body([]byte("task not found"))
 		return
 	}
 	models.DefaultTaskList.Save(&t)
+}
+
+// Example:
+//
+//   req: DELTE /task/1
+//   res: 200
+func (this *TaskController) DeleteTask() {
+	id := this.Ctx.Input.Param(":id")
+	beego.Info("Task is ", id)
+	intid, _ := strconv.ParseInt(id, 10, 64)
+	if err := models.DefaultTaskList.Delete(intid); err != nil {
+		this.Ctx.Output.SetStatus(404)
+		this.Ctx.Output.Body([]byte(err.Error()))
+		return
+	}
+	this.Ctx.Output.SetStatus(200)
 }

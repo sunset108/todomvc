@@ -32,21 +32,22 @@ func NewTaskManager() *TaskManager {
 }
 
 // Save saves the given Task in the TaskManager.
-func (m *TaskManager) Save(task *Task) error {
+func (m *TaskManager) Save(task *Task) (*Task, error) {
 	if task.ID == 0 {
 		m.lastID++
 		task.ID = m.lastID
-		m.tasks = append(m.tasks, cloneTask(task))
-		return nil
+		newTask := cloneTask(task)
+		m.tasks = append(m.tasks, newTask)
+		return newTask, nil
 	}
 
 	for i, t := range m.tasks {
 		if t.ID == task.ID {
 			m.tasks[i] = cloneTask(task)
-			return nil
+			return m.tasks[i], nil
 		}
 	}
-	return fmt.Errorf("unknown task")
+	return nil, fmt.Errorf("unknown task")
 }
 
 // cloneTask creates and returns a deep copy of the given Task.
@@ -55,9 +56,35 @@ func cloneTask(t *Task) *Task {
 	return &c
 }
 
+func (m *TaskManager) Delete(ID int64) error {
+	for i, t := range m.tasks {
+		if t.ID == ID {
+			m.tasks = append(m.tasks[:i], m.tasks[i+1:]...)
+			return nil
+		}
+	}
+	return fmt.Errorf("unknown task")
+}
+
 // All returns the list of all the Tasks in the TaskManager.
 func (m *TaskManager) All() []*Task {
 	return m.tasks
+}
+
+func (m *TaskManager) CompleteAll(Done bool) {
+	for _, t := range m.tasks {
+		t.Done = Done
+	}
+}
+
+func (m *TaskManager) ClearCompleted() {
+	tasks := []*Task{}
+	for _, t := range m.tasks {
+		if !t.Done {
+			tasks = append(tasks, t)
+		}
+	}
+	m.tasks = tasks
 }
 
 // Find returns the Task with the given id in the TaskManager and a boolean
